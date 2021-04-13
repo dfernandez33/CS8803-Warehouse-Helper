@@ -16,14 +16,12 @@ MARKER_ROT_SIGMA = 25  # rotational err in deg
 
 
 class World:
-    def __init__(self, boundary_points, obstacle_points):
+    def __init__(self, boundary_points, obstacle_points, markers):
         self.world_polygon = geometry.Polygon([[p.x, p.y] for p in boundary_points])
         self.obstacles = geometry.Polygon([[p.x, p.y] for p in obstacle_points])
-
-
-""" Particle class
-    A class for particle, each particle contains x, y, and heading information
-"""
+        self.markers = []
+        for marker in markers:
+            self.markers.append(geometry.Point(marker[0], marker[1]))
 
 
 class Particle:
@@ -49,21 +47,17 @@ class Particle:
         return self.x, self.y, self.h
 
 
-""" Particle Filter class
-    A class to intitialize particles and update them based on motion and measurements
-"""
-
-
 class ParticleFilter:
     def __init__(
         self,
         boundary_points,
         obstacle_points,
+        markers,
         num_particles=1000,
         sigma_rotation=1.0,
         sigma_translation=1.0,
     ):
-        self.world = World(boundary_points, obstacle_points)
+        self.world = World(boundary_points, obstacle_points, markers)
         self.particles = []
         self.num_particles = num_particles
 
@@ -79,12 +73,6 @@ class ParticleFilter:
         self.sigma_translation = sigma_translation
 
     def motion_update(self, odom_reading, sigma_translation=1.0, sigma_rotation=1.0):
-        """ Particle filter motion update
-            Arguments:
-            odom_reading -- odometry to move (dx, dy, dh) in *robot local frame*
-            Returns: the list of particles represents belief \tilde{p}(x_{t} | u_{t})
-                    after motion update
-        """
         motion_particles = []
 
         for particle in self.particles:
@@ -102,15 +90,12 @@ class ParticleFilter:
         self.particles = motion_particles
 
     def measurement_update(self, measured_marker_list, grid):
-        """ Particle filter measurement update
-        """
-
         if len(measured_marker_list) > 0:
             for particle in self.particles:
                 if self.world.world_polygon.contains(
                     particle.shapely_point
                 ) and not self.world.obstacles(particle.shapely_point):
-                    particle_markers = get_visible_markers(particle)
+                    particle_markers = get_visible_markers(particle, self.world.markers)
                     gt_markers = measured_marker_list
                     marker_pairs = []
 

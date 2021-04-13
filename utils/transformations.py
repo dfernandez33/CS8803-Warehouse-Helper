@@ -28,7 +28,7 @@ def delta(g0, g1):
 
 
 
-def world2robot(robotPose: tuple(float,float,float), objectPose: tuple(float,float,float)) -> tuple(float,float,float):
+def world2robot(robotPose: tuple, objectPose: tuple) -> tuple:
     #transforms objectPose from world frame to robot frame
 
     #objectPose: pose of object in world frame

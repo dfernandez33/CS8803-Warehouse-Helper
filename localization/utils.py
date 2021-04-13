@@ -9,7 +9,7 @@ def rotate_point(x, y, heading_deg):
     return xr, yr
 
 
-def get_visible_markers(particle):
+def get_visible_markers(particle, markers):
     pass
 
 
