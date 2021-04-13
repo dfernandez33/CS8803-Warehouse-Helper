@@ -10,8 +10,9 @@ import sys
 
 class RRT:
 
+    # These class variables are used for drawing in pygame
     SCREEN_SIZE = (1164, 800)
-    SCALE_FACTOR = (1164 / 2921, 800 / 2057.4)  # since window is size 800, 800 and the environment is 2.921x2.0066
+    SCALE_FACTOR = (1164 / 2921, 800 / 2057.4)  # since window is size 800, 800 and the environment is 2921mm x2.0066mm
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GREEN = (0, 255, 0)
@@ -32,6 +33,15 @@ class RRT:
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
 
     def get_optimal_path(self, start: Tuple, goal: Tuple, display=False, distance_tolerance=50) -> List[Tuple]:
+        """
+        Provides the optimal path from start to goal. All inputs should be in the global coordinate frame. Output
+        waypoints are in the global coordinate frame.
+        :param start: tuple with x,y coordinates of starting location (in mm).
+        :param goal: tuple with x,y coordinate of goal location (in mm).
+        :param display: whether to display the resulting tree or not
+        :param distance_tolerance: how close to the goal the path should be to.
+        :return: List of waypoints representing the path.
+        """
         if display:
             print('Initializing Display')
             self.__init_display(start, goal)
@@ -57,6 +67,9 @@ class RRT:
         return best_path
 
     def __build_tree(self, start_position: Tuple, display):
+        """
+        This function implements the RRT algorithm. For more info look it up online, should be straight forward.
+        """
         self.vertices.add(start_position)
         for i in range(self.num_iterations):
             print('Running iteration {}'.format(i))
@@ -99,6 +112,14 @@ class RRT:
                 nearest_vertex = v
         return nearest_vertex, nearest_dist
 
+    def __get_obstacles(self) -> List[Tuple]:
+        obstacles = []
+        obstacles_file = open(self.obstacles_file)
+        for obstacle in obstacles_file.readlines():
+            obstacles.append(tuple([float(x) for x in obstacle.split(",")]))
+
+        return obstacles
+
     @staticmethod
     def __build_graph(vertices: Set, edges: Set) -> networkx.Graph:
         graph = networkx.Graph()
@@ -109,6 +130,13 @@ class RRT:
         graph.add_edges_from(ebunch)
         return graph
 
+    @staticmethod
+    def __euclidean_dist(x1: Tuple, x2: Tuple) -> float:
+        return math.sqrt((x2[0] - x1[0]) ** 2 + (x2[1] - x1[1]) ** 2)
+
+    ######################################################################
+    # All the functions below deal with drawing in pygame, no RRT logic. #
+    ######################################################################
     def __init_display(self, start: Tuple, goal: Tuple):
         self.screen.fill(self.WHITE)
         scaled_start = (start[0] * self.SCALE_FACTOR[0], start[1] * self.SCALE_FACTOR[1])
@@ -135,18 +163,6 @@ class RRT:
         for i in range(len(path) - 1):
             curr_edge = (path[i], path[i + 1])
             self.__draw_connections(curr_edge, self.RED)
-
-    def __get_obstacles(self) -> List[Tuple]:
-        obstacles = []
-        obstacles_file = open(self.obstacles_file)
-        for obstacle in obstacles_file.readlines():
-            obstacles.append(tuple([float(x) for x in obstacle.split(",")]))
-
-        return obstacles
-
-    @staticmethod
-    def __euclidean_dist(x1: Tuple, x2: Tuple) -> float:
-        return math.sqrt((x2[0] - x1[0]) ** 2 + (x2[1] - x1[1]) ** 2)
 
 
 if __name__ == '__main__':

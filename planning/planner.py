@@ -28,6 +28,9 @@ class Planner:
         return parsed_plan
 
     def __parse_query(self, query: Dict):
+        """
+        Parses the provided query in order to append the proper goal proposition to the pddl problem state
+        """
         goal_propositions = []
         # always add 1 to index since objects in pddl start at 1 not 0
         for i in range(query['cups']):  # build propositions for cups
@@ -48,6 +51,9 @@ class Planner:
         return complete_problem
 
     def __parse_plan(self, plan: Dict):
+        """
+        Parse plan returned by PDDL solver into a list of Python objects representing actions.
+        """
         parsed_plan = []
         # actions have the form '(command param1 param2)'
         for action in plan:
@@ -81,8 +87,6 @@ class Planner:
             return Location.CARGO_BAY
         elif param == 'starting_location':
             return Location.STARTING_LOCATION
-
-
 
 
 if __name__ == '__main__':
