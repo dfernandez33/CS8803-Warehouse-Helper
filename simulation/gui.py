@@ -10,7 +10,7 @@ import math
 from PIL import ImageTk
 
 from grid import *
-from particle import Particle
+from localization.particle_filter import Particle
 from utils import *
 
 
