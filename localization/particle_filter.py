@@ -21,7 +21,7 @@ class World:
         self.obstacles = geometry.Polygon([[p.x, p.y] for p in obstacle_points])
         self.markers = []
         for marker in markers:
-            self.markers.append(geometry.Point(marker[0], marker[1]))
+            self.markers.append((geometry.Point(marker[0], marker[1]), marker[3]))
 
 
 class Particle:
@@ -64,7 +64,7 @@ class ParticleFilter:
         minx, miny, maxx, maxy = self.world.world_polygon.bounds
         while len(self.particles) < self.num_particles:
             point = geometry.Point(np.randint(minx, maxx), np.randint(miny, maxy))
-            if self.world.world_polygon.contains(point) and not self.world.obstacles(
+            if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(
                 point
             ):
                 self.particles.append(Particle(point))
@@ -140,9 +140,9 @@ class ParticleFilter:
             for particle in self.particles:
                 particle.weight /= total_weight
                 self.particles = sample_particles(
-                    existing_particles=self.particles, random_particles=50
+                    self.world, existing_particles=self.particles, random_particles=50
                 )
         else:
             self.particles = sample_particles(
-                existing_particles=None, random_particles=self.num_particles
+                self.world, existing_particles=None, random_particles=self.num_particles
             )
