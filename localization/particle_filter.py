@@ -21,7 +21,7 @@ class World:
         self.obstacles = geometry.Polygon([[p.x, p.y] for p in obstacle_points])
         self.markers = []
         for marker in markers:
-            self.markers.append((geometry.Point(marker[0], marker[1]), marker[3]))
+            self.markers.append(marker)
 
 
 class Particle:
@@ -66,9 +66,9 @@ class ParticleFilter:
         minx, miny, maxx, maxy = self.world.world_polygon.bounds
         while len(self.particles) < self.num_particles:
             point = geometry.Point(np.randint(minx, maxx), np.randint(miny, maxy))
-            if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(
+            if self.world.world_polygon.contains(
                 point
-            ):
+            ) and not self.world.obstacles.contains(point):
                 self.particles.append(Particle(point, num_sample=self.num_particles))
 
         self.sigma_rotation = sigma_rotation
@@ -86,7 +86,11 @@ class ParticleFilter:
             new_y = (y + rot_y) + np.random.normal(0.0, scale=self.sigma_translation)
             new_h = (h + dh) + np.random.normal(0.0, scale=self.sigma_rotation)
 
-            new_particle = Particle(geometry.Point(new_x, new_y), weight=particle.weight, heading=new_h % 360)
+            new_particle = Particle(
+                geometry.Point(new_x, new_y),
+                weight=particle.weight,
+                heading=new_h % 360,
+            )
             motion_particles.append(new_particle)
 
         self.particles = motion_particles
@@ -142,11 +146,17 @@ class ParticleFilter:
             for particle in self.particles:
                 particle.weight /= total_weight
                 self.particles = sample_particles(
-                    self.world, existing_particles=self.particles, random_particles=50, num_sample=self.num_particles // 2
+                    self.world,
+                    existing_particles=self.particles,
+                    random_particles=50,
+                    num_sample=self.num_particles // 2,
                 )
         else:
             self.particles = sample_particles(
-                self.world, existing_particles=None, random_particles=self.num_particles, num_sample=self.num_particles // 2
+                self.world,
+                existing_particles=None,
+                random_particles=self.num_particles,
+                num_sample=self.num_particles,
             )
-        
+
         self.top_particle = max(self.particles, key=lambda p: p.weight)
