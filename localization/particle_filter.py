@@ -6,7 +6,7 @@ from localization.utils import (
     rotate_point,
     get_visible_markers,
     marker_distance,
-    marker_heeading_diff,
+    marker_heading_diff,
     sample_particles,
 )
 
@@ -121,7 +121,7 @@ class ParticleFilter:
                     prob = 1.0
                     for particle_marker, gt_marker in marker_pairs:
                         d_xy = marker_distance(particle_marker, gt_marker)
-                        d_h = marker_heeading_diff(particle_marker, gt_marker)
+                        d_h = marker_heading_diff(particle_marker, gt_marker)
 
                         exp1 = (d_xy ** 2) / (2 * MARKER_TRANS_SIGMA ** 2)
                         exp2 = (d_h ** 2) / (2 * MARKER_ROT_SIGMA ** 2)

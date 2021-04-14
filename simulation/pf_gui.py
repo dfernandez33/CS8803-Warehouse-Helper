@@ -5,10 +5,10 @@ import time
 
 from grid import CozGrid
 from gui import GUIWindow
-from particle import Particle, Robot
+from localization.particle_filter import Particle, Robot
 from setting import *
-from particle_filter import *
-from utils import *
+#from particle_filter import *
+from localization.utils import *
 
 
 # map you want to test
