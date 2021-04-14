@@ -1,4 +1,7 @@
 import math
+import numpy as np
+from shapely import geometry 
+from localization.particle_filter import Particle
 
 
 def rotate_point(x, y, heading_deg):
@@ -9,17 +12,46 @@ def rotate_point(x, y, heading_deg):
     return xr, yr
 
 
-def get_visible_markers(particle):
-    pass
-
+def get_visible_markers(particle, markers):
+    # Return list of markers in the vision cone for particle
+    particle_point = particle.shapely_point
+    x, y, h = particle.xyh
 
 def marker_distance(marker_a, marker_b):
-    pass
+    coord_a = marker_a[0]
+    coord_b = marker_b[0]
+    return coord_a.distance(coord_b)
 
 
 def marker_heeading_diff(marker_a, marker_b):
-    pass
+    heading_a = marker_a[1]
+    heading_b = marker_b[1]
+    return (heading_a - heading_b) % 360 
 
 
-def sample_particles(existing_particles, random_particles):
-    pass
+def sample_particles(world, existing_particles, random_particles, num_sample):
+    new_particles = []
+    minx, miny, maxx, maxy = world.world_polygon.bounds
+    while len(new_particles) < random_particles:
+        point = geometry.Point(np.randint(minx, maxx), np.randint(miny, maxy))
+        if world.world_polygon.contains(point) and not world.obstacles.contains(
+            point
+        ):
+            new_particles.append(Particle(point, num_sample=random_particles))
+    
+    if existing_particles:
+        new_particles = existing_particles + new_particles
+
+    probs = []
+    particles = []
+
+    for particle in new_particles:
+        probs.append(particle.weight)
+        particles.append(particle)
+    
+    new_particles = np.random.choice(new_particles, size=num_sample, replace=False, p=probs)
+    return new_particles
+
+    
+
+    
