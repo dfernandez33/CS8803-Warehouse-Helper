@@ -25,7 +25,7 @@ class World:
 
 
 class Particle:
-    def __init__(self, point, weight=1.0, heading=None):
+    def __init__(self, point, num_sample=1, weight=1.0, heading=None):
         if heading is None:
             heading = np.randint(0, 360)
 
@@ -33,7 +33,7 @@ class Particle:
         self.x = point.x
         self.y = point.y
         self.h = heading
-        self.weight = weight
+        self.weight = weight / num_sample
 
     def __repr__(self):
         return "(x = %f, y = %f, heading = %f deg)" % (self.x, self.y, self.h)
@@ -60,6 +60,8 @@ class ParticleFilter:
         self.world = World(boundary_points, obstacle_points, markers)
         self.particles = []
         self.num_particles = num_particles
+        # could do average of top-k here instead
+        self.top_particle = None
 
         minx, miny, maxx, maxy = self.world.world_polygon.bounds
         while len(self.particles) < self.num_particles:
@@ -67,7 +69,7 @@ class ParticleFilter:
             if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(
                 point
             ):
-                self.particles.append(Particle(point))
+                self.particles.append(Particle(point, num_sample=self.num_particles))
 
         self.sigma_rotation = sigma_rotation
         self.sigma_translation = sigma_translation
@@ -84,7 +86,7 @@ class ParticleFilter:
             new_y = (y + rot_y) + np.random.normal(0.0, scale=self.sigma_translation)
             new_h = (h + dh) + np.random.normal(0.0, scale=self.sigma_rotation)
 
-            new_particle = Particle(geometry.Point(new_x, new_y), new_h % 360)
+            new_particle = Particle(geometry.Point(new_x, new_y), weight=particle.weight, heading=new_h % 360)
             motion_particles.append(new_particle)
 
         self.particles = motion_particles
@@ -130,7 +132,7 @@ class ParticleFilter:
 
         else:
             for particle in self.particles:
-                particle.weight = 1.0
+                particle.weight = 1.0 / len(self.particles)
 
         total_weight = 0.0
         for particle in self.particles:
@@ -140,9 +142,11 @@ class ParticleFilter:
             for particle in self.particles:
                 particle.weight /= total_weight
                 self.particles = sample_particles(
-                    self.world, existing_particles=self.particles, random_particles=50
+                    self.world, existing_particles=self.particles, random_particles=50, num_sample=self.num_particles // 2
                 )
         else:
             self.particles = sample_particles(
-                self.world, existing_particles=None, random_particles=self.num_particles
+                self.world, existing_particles=None, random_particles=self.num_particles, num_sample=self.num_particles // 2
             )
+        
+        self.top_particle = max(self.particles, key=lambda p: p.weight)
