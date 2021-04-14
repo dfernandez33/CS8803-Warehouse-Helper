@@ -1,10 +1,10 @@
 import math
 import numpy as np
 from shapely import geometry
-from localization.particle_filter import Particle
+from localization.particle_filter import Particle, World
 
 
-def rotate_point(x, y, heading_deg):
+def rotate_point(x: float, y: float, heading_deg: float):
     c = math.cos(math.radians(heading_deg))
     s = math.sin(math.radians(heading_deg))
     xr = x * c + y * -s
@@ -12,7 +12,7 @@ def rotate_point(x, y, heading_deg):
     return xr, yr
 
 
-def get_visible_markers(particle, markers):
+def get_visible_markers(particle: Particle, markers: list):
     # Return list of markers in the vision cone for particle
     marker_list = []
     x, y, h = particle.xyh
@@ -26,19 +26,23 @@ def get_visible_markers(particle, markers):
     return marker_list
 
 
-def marker_distance(marker_a, marker_b):
-    coord_a = marker_a[0]
-    coord_b = marker_b[0]
-    return coord_a.distance(coord_b)
+def marker_distance(marker_a: tuple, marker_b: tuple):
+    x_a = marker_a[0]
+    y_a = marker_a[1]
+
+    x_b = marker_b[0]
+    y_b = marker_b[1]
+
+    return np.sqrt((x_a - x_b)**2 + (y_a - y_b)**2)
 
 
-def marker_heeading_diff(marker_a, marker_b):
-    heading_a = marker_a[1]
-    heading_b = marker_b[1]
+def marker_heeading_diff(marker_a: tuple, marker_b: tuple):
+    heading_a = marker_a[2]
+    heading_b = marker_b[2]
     return (heading_a - heading_b) % 360
 
 
-def sample_particles(world, existing_particles, random_particles, num_sample):
+def sample_particles(world: World, existing_particles: list, random_particles: int, num_sample: int):
     new_particles = []
     minx, miny, maxx, maxy = world.world_polygon.bounds
     while len(new_particles) < random_particles:

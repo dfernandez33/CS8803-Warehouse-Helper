@@ -16,7 +16,7 @@ MARKER_ROT_SIGMA = 25  # rotational err in deg
 
 
 class World:
-    def __init__(self, boundary_points, obstacle_points, markers):
+    def __init__(self, boundary_points: list, obstacle_points: list, markers: list):
         self.world_polygon = geometry.Polygon([[p.x, p.y] for p in boundary_points])
         self.obstacles = geometry.Polygon([[p.x, p.y] for p in obstacle_points])
         self.markers = []
@@ -25,7 +25,7 @@ class World:
 
 
 class Particle:
-    def __init__(self, point, num_sample=1, weight=1.0, heading=None):
+    def __init__(self, point: geometry.Point, num_sample=1, weight=1.0, heading=None):
         if heading is None:
             heading = np.randint(0, 360)
 
@@ -50,9 +50,9 @@ class Particle:
 class ParticleFilter:
     def __init__(
         self,
-        boundary_points,
-        obstacle_points,
-        markers,
+        boundary_points: list,
+        obstacle_points: list,
+        markers: list,
         num_particles=1000,
         sigma_rotation=1.0,
         sigma_translation=1.0,
@@ -74,7 +74,7 @@ class ParticleFilter:
         self.sigma_rotation = sigma_rotation
         self.sigma_translation = sigma_translation
 
-    def motion_update(self, odom_reading, sigma_translation=1.0, sigma_rotation=1.0):
+    def motion_update(self, odom_reading: tuple, sigma_translation=1.0, sigma_rotation=1.0):
         motion_particles = []
 
         for particle in self.particles:
@@ -95,7 +95,7 @@ class ParticleFilter:
 
         self.particles = motion_particles
 
-    def measurement_update(self, measured_marker_list, grid):
+    def measurement_update(self, measured_marker_list: list):
         if len(measured_marker_list) > 0:
             for particle in self.particles:
                 if self.world.world_polygon.contains(
