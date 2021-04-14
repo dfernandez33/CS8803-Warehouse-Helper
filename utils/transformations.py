@@ -28,41 +28,38 @@ def delta(g0, g1):
 
 
 
-def world2robot(robotPose: tuple(float,float,float), objectPose: tuple(float,float,float)) -> tuple(float,float,float):
+def world2robot(robotPose, objectPose):
     #transforms objectPose from world frame to robot frame
 
-    #objectPose: pose of object in world frame
+    #objectPose: pose of object in robot pose
     #robotPose: pose of robot base in world frame
 
-    worldPose = vector3(0,0,0)
     rx, ry, rth = robotPose
     ox, oy, oth = objectPose
-    rPose = Pose2(vector3(rx,ry,np.radians(rth)))
+    rPos = Pose2(vector3(rx,ry,))
+    rAngle = Pose2(vector3(0,0,np.radians(rth)))
     oPose = Pose2(vector3(ox,oy,np.radians(oth)))
     
-    return compose(worldPose, rPose, oPose), rPose.transform_to(Point2(ox,oy))
-
-#     w2r = getTransformationMatrix(robotPose)
-#     xObject = 
+    rPose = compose(rPos, rAngle)
+    newPose = rPose.transformTo(Point2(ox,oy))
+    x, y = newPose.x(), newPose.y()
+    print(newPose)
+    return x, y, (oth - rth)%360
 
     
 
-# def getTransformationMatrix(pose: tuple(int,int,int)) -> tuple(int,int,int):
-#     #get transformation matrix a given pose (x,y,theta)
+def robot2world(robotPose, objectPose):
+    worldPose = Pose2(vector3(0,0,0))
+    rx, ry, rth = robotPose
 
-#     R = np.identity(3)
-#     cos = np.cosd(pose[2])
-#     sin = np.sind(pose[2])
-#     R[0,0] = cos
-#     R[1,1] = cos
-#     R[0,1] = -sin
-#     R[1,0] = sin
-#     R[2,1] = pose[1]
-#     R[2,0] = pose[0]
+    ox, oy, oth = objectPose
+    rPos = Pose2(vector3(rx,ry,0))
+    rAngle = Pose2(vector3(0,0,np.radians(rth)))
+    oPose = Pose2(vector3(ox,oy,np.radians(oth)))
+    
+    rPose = compose(rPos, rAngle)
+    newPose = rPose.transformFrom(Point2(ox,oy))
+    x, y = newPose.x(), newPose.y()
+    return x, y, (rth - oth)%360
 
-#     return R
 
-if __name__ == "__main__":
-    robotsPose = (2,2,0)
-    objectPose = (4,4,0)
-    print(world2robot(robotsPose, objectPose))
