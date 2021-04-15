@@ -3,10 +3,13 @@ from __future__ import absolute_import
 import threading
 import time
 
+
+from Robot import Robot
 from grid import CozGrid
 from gui import GUIWindow
+from utils import *
 import sys
-from localization.particle_filter import Particle
+from localization.particle_filter import Particle, ParticleFilter
 #from particle_filter import *
 from localization.utils import *
 
@@ -68,10 +71,11 @@ def move_robot_circular(robot, dh, speed, grid):
 
 
 # particle filter class
-class ParticleFilter:
+class ParticleFilterSim:
 
-    def __init__(self, particles, robbie, grid):
-        self.particles = particles
+    def __init__(self, particles_filter, robbie, grid):
+        self.pf = particles_filter
+        #self.particles = particlefilter.particles
         self.robbie = robbie
         self.grid = grid
 
@@ -90,12 +94,12 @@ class ParticleFilter:
 
 
         # ---------- PF: Motion model update ----------
-        self.particles = motion_update(self.particles, odom)
+        self.pf.motion_update(odom)
 
 
         # ---------- Find markers in camera ----------
         # read markers
-        r_marker_list_raw = self.robbie.read_markers(self.grid)
+        r_marker_list_raw = get_visible_markers(self.robbie,self.grid.markers)
         #print("r_marker_list :", r_marker_list)
 
         # add noise to marker list
@@ -106,12 +110,12 @@ class ParticleFilter:
 
 
         # ---------- PF: Sensor (markers) model update ----------
-        self.particles = measurement_update(self.particles, r_marker_list, self.grid)
+        self.pf.measurement_update(r_marker_list, self.grid)
 
 
         # ---------- Display current state in GUI ----------
         # Try to find current best estimate for display
-        m_x, m_y, m_h, m_confident = compute_mean_pose(self.particles)
+        m_x, m_y, m_h, m_confident = compute_mean_pose(self.pf.particles)
         return (m_x, m_y, m_h, m_confident)
 
 
@@ -132,19 +136,34 @@ class ParticleFilterThread(threading.Thread):
             self.gui.updated.set()
 
 
+def __readCoordinatesFromTxt(file: str) -> list:
+    points = []
+    point_file = open(file)
+
+    for p in point_file.readlines():
+        ordered_pair = p.split(",")
+        points.append((ordered_pair[0],ordered_pair[1]))
+    return points
+
+
 if __name__ == "__main__":
     grid = CozGrid(Map_filename)
 
     # initial distribution assigns each particle an equal probability
-    particles = Particle.create_random(PARTICLE_COUNT, grid)
+
+    boundary_points = __readCoordinatesFromTxt('boundary_points.txt')
+    obstacle_points = __readCoordinatesFromTxt('obstacle_points.txt')
+    markers = grid.markers
+    # particles = Particle.create_random(PARTICLE_COUNT, grid)
     robbie = Robot(Robot_init_pose[0], Robot_init_pose[1], Robot_init_pose[2])
-    particlefilter = ParticleFilter(particles, robbie, grid)
+    particlefilter = ParticleFilter(boundary_points,obstacle_points,markers)
+    particlefilter_sim = ParticleFilterSim(particlefilter,robbie,grid)
 
     if Use_GUI:
         gui = GUIWindow(grid)
-        filter_thread = ParticleFilterThread(particlefilter, gui)
+        filter_thread = ParticleFilterThread(particlefilter_sim, gui)
         filter_thread.start()
         gui.start()
     else:
         while True:
-            particlefilter.update()
+            particlefilter_sim.update()

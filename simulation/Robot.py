@@ -1,5 +1,5 @@
 from localization.particle_filter import Particle
-
+from shapely import geometry
 from setting import *
 import random
 random.seed(RANDOM_SEED)
@@ -15,7 +15,8 @@ from grid import *
 class Robot(Particle):
 
     def __init__(self, x, y, h):
-        super(Robot, self).__init__(x, y, h)
+        point = geometry.Point(x,y)
+        super(Robot, self).__init__(point, heading=h)
 
     #def __init__(self, grid):
     #    super(Robot, self).__init__(*grid.random_free_place())
