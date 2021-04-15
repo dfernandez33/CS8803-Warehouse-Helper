@@ -21,7 +21,7 @@ class RRT:
     RED = (255, 0, 0)
 
     def __init__(self, obstacles_file: str, robot_radius: float, arena_width: float,
-                 arena_height: float, num_iteration=1000):
+                 arena_height: float, num_iteration=1000, display=False):
         self.obstacles_file = obstacles_file
         self.num_iterations = num_iteration
         self.robot_radius = robot_radius
@@ -30,9 +30,11 @@ class RRT:
         self.obstacles = self.__get_obstacles()
         self.vertices = set()
         self.edges = set()
-        self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
+        self.display = display
+        if display:
+            self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
 
-    def get_optimal_path(self, start: Tuple, goal: Tuple, display=False, distance_tolerance=50) -> List[Tuple]:
+    def get_optimal_path(self, start: Tuple, goal: Tuple, distance_tolerance=50) -> List[Tuple]:
         """
         Provides the optimal path from start to goal. All inputs should be in the global coordinate frame. Output
         waypoints are in the global coordinate frame.
@@ -42,11 +44,11 @@ class RRT:
         :param distance_tolerance: how close to the goal the path should be to.
         :return: List of waypoints representing the path.
         """
-        if display:
+        if self.display:
             print('Initializing Display')
             self.__init_display(start, goal)
 
-        self.__build_tree(start, display)
+        self.__build_tree(start)
         graph = self.__build_graph(self.vertices, self.edges)
         potential_goals = []
         for vertex in self.vertices:  # find all vertices within 5m of goal
@@ -62,11 +64,11 @@ class RRT:
             return []
 
         best_path = heapq.heappop(path_queue)[1]
-        if display:
+        if self.display:
             self.__draw_optimal_path(best_path)
         return best_path
 
-    def __build_tree(self, start_position: Tuple, display):
+    def __build_tree(self, start_position: Tuple):
         """
         This function implements the RRT algorithm. For more info look it up online, should be straight forward.
         """
@@ -79,7 +81,7 @@ class RRT:
             if self.__obstacle_free(x_nearest, x_rand):
                 self.vertices.add(x_rand)
                 self.edges.add((x_nearest, x_rand, distance))
-                if display:
+                if self.display:
                     self.__draw_connections((x_nearest, x_rand))
 
     def __obstacle_free(self, start: Tuple, end: Tuple) -> bool:
@@ -141,10 +143,10 @@ class RRT:
         self.screen.fill(self.WHITE)
         scaled_start = (start[0] * self.SCALE_FACTOR[0], start[1] * self.SCALE_FACTOR[1])
         scaled_goal = (goal[0] * self.SCALE_FACTOR[0], goal[1] * self.SCALE_FACTOR[1])
-        pygame.draw.circle(self.screen, self.GREEN, [scaled_start[0], self.SCREEN_SIZE[1] - scaled_start[1]],
-                           76 * self.SCALE_FACTOR[0], 0)
-        pygame.draw.circle(self.screen, self.BLUE, [scaled_goal[0], self.SCREEN_SIZE[1] - scaled_goal[1]],
-                           76 * self.SCALE_FACTOR[0], 0)
+        pygame.draw.circle(self.screen, self.GREEN, [int(scaled_start[0]),int(self.SCREEN_SIZE[1] - scaled_start[1])],
+                           int(76 * self.SCALE_FACTOR[0]), 0)
+        pygame.draw.circle(self.screen, self.BLUE, [int(scaled_goal[0]), int(self.SCREEN_SIZE[1] - scaled_goal[1])],
+                           int(76 * self.SCALE_FACTOR[0]), 0)
         for obstacle in self.obstacles:
             pygame.draw.rect(self.screen, self.BLACK, (obstacle[0] * self.SCALE_FACTOR[0],
                                                        self.SCREEN_SIZE[1] - (obstacle[1] * self.SCALE_FACTOR[1]),
@@ -166,10 +168,6 @@ class RRT:
 
 
 if __name__ == '__main__':
-    rrt = RRT('obstacles.txt', 165.1, 2921, 2057.4, num_iteration=3000)
-    optimal_path = rrt.get_optimal_path((500, 500), (2500, 1600), display=True)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+    rrt = RRT('obstacles.txt', 165.1, 2921, 2057.4, num_iteration=3000, display=False)
+    optimal_path = rrt.get_optimal_path((500, 500), (2500, 1600))
+    print(optimal_path)
