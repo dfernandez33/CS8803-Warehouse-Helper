@@ -160,3 +160,4 @@ class ParticleFilter:
             )
 
         self.top_particle = max(self.particles, key=lambda p: p.weight)
+

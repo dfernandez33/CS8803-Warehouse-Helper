@@ -7,13 +7,15 @@ random.seed(RANDOM_SEED)
 import copy
 import math
 
+import sys
+
 from PIL import ImageTk
 
 from grid import *
-from localization.particle_filter import Particle
 from utils import *
 
 
+from localization.particle_filter import Particle
 
 # GUI class
 class GUIWindow():

@@ -1,7 +1,9 @@
 import math
 import numpy as np
 from shapely import geometry
-from localization.particle_filter import Particle
+import sys
+
+from localization.particle_filter import *
 
 
 def rotate_point(x, y, heading_deg):
