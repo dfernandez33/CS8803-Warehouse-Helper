@@ -14,7 +14,7 @@ from localization.particle_filter import Particle, ParticleFilter
 from localization.utils import *
 
 # map you want to test
-Map_filename = "map_test.json"
+Map_filename = "map_arena.json"
 
 # whether enable the GUI
 Use_GUI = True
@@ -30,9 +30,9 @@ Use_GUI = True
 Move_circular = False
 
 # robot moving speed (grid per move)
-Robot_speed = 0.5
+Robot_speed = 25
 # initial robot transformation (X, Y, yaw in deg)
-Robot_init_pose = (6, 3, 0)
+Robot_init_pose = (500, 300, 0)
 # Angle (in degree) to turn per run in circle motion mode
 Dh_circular = 10
 
@@ -73,12 +73,13 @@ def move_robot_circular(robot, dh, speed, grid):
 # particle filter class
 class ParticleFilterSim:
 
-    def __init__(self, particles_filter, robbie, grid):
-        self.pf = particles_filter
+    def __init__(self, particle_filter, robbie, grid):
+        self.pf = particle_filter
         #self.particles = particlefilter.particles
         self.robbie = robbie
         self.grid = grid
         self.markers = [parse_marker_info(x[0],x[1],x[2]) for x in self.grid.markers]
+
 
     def update(self):
 
@@ -101,8 +102,8 @@ class ParticleFilterSim:
         # ---------- Find markers in camera ----------
         # read markers
         #
-        r_marker_list_raw = get_visible_markers(self.robbie,self.markers)
-        #print("r_marker_list :", r_marker_list)
+        r_marker_list_raw = self.pf.get_visible_markers(self.robbie,self.markers)
+        print("r_marker_list :", r_marker_list_raw)
 
         # add noise to marker list
         r_marker_list = []
@@ -112,7 +113,7 @@ class ParticleFilterSim:
 
 
         # ---------- PF: Sensor (markers) model update ----------
-        self.pf.measurement_update(r_marker_list, self.grid)
+        self.pf.measurement_update(r_marker_list)
 
 
         # ---------- Display current state in GUI ----------
@@ -132,20 +133,13 @@ class ParticleFilterThread(threading.Thread):
     def run(self):
         while True:
             estimated = self.filter.update()
-            self.gui.show_particles(self.filter.particles)
+            self.gui.show_particles(self.filter.pf.particles)
             self.gui.show_mean(estimated[0], estimated[1], estimated[2], estimated[3])
             self.gui.show_robot(self.filter.robbie)
             self.gui.updated.set()
 
 
-def __readCoordinatesFromTxt(file: str) -> list:
-    points = []
-    point_file = open(file)
 
-    for p in point_file.readlines():
-        ordered_pair = p.split(",")
-        points.append((ordered_pair[0],ordered_pair[1]))
-    return points
 
 
 if __name__ == "__main__":
@@ -153,8 +147,8 @@ if __name__ == "__main__":
 
     # initial distribution assigns each particle an equal probability
 
-    boundary_points = __readCoordinatesFromTxt('boundary_points.txt')
-    obstacle_points = __readCoordinatesFromTxt('obstacle_points.txt')
+    boundary_points = readCoordinatesFromTxt('boundary_points.txt')
+    obstacle_points = readCoordinatesFromTxt('obstacle_points.txt')
     markers = [parse_marker_info(x[0],x[1],x[2]) for x in grid.markers]
     # particles = Particle.create_random(PARTICLE_COUNT, grid)
     robbie = Robot(Robot_init_pose[0], Robot_init_pose[1], Robot_init_pose[2])

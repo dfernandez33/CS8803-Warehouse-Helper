@@ -18,6 +18,7 @@ from utils import *
 from localization.particle_filter import Particle
 
 # GUI class
+SCALE = 50
 class GUIWindow():
     def __init__(self, grid, show_camera=False):
         self.width = grid.width
@@ -49,19 +50,24 @@ class GUIWindow():
     plot
     """
     def drawGrid(self):
-        for y in range(1,self.grid.height):
+        for y in range(1,self.height):
             self.canvas.create_line(0, y * self.grid.scale, int(self.canvas.cget("width")) - 1, y * self.grid.scale)
-        for x in range(1,self.grid.width):
+        for x in range(1,self.width):
             self.canvas.create_line(x * self.grid.scale, 0, x * self.grid.scale, int(self.canvas.cget("height")) - 1)
-
     def drawOccubpied(self):
         for block in self.occupied:
             self.colorCell(block, '#222222')
+        self.colorRectangle(self.grid.obstaclePoints[0],self.grid.obstaclePoints[2],'#8B4513')
+        self.colorRectangle(self.grid.obstaclePoints[3],self.grid.obstaclePoints[5],'#8B4513')
+
 
     def drawMarkers(self):
         for marker in self.markers:
-            marker_x, marker_y, marker_h = parse_marker_info(marker[0], marker[1], marker[2]);
-
+            marker_x, marker_y, marker_h = parse_marker_info(marker[0]/SCALE, marker[1]/SCALE, marker[2])
+            if marker_x > self.width:
+                marker_x = self.width
+            if marker_y > self.height:
+                marker_y = self.height
             arrow_head_x, arrow_head_y = rotate_point(0.8, 0, marker_h)
             self.colorLine((marker_x, marker_y), (marker_x + arrow_head_x, marker_y + arrow_head_y), \
                 linewidth=2, color='#222222')
@@ -82,8 +88,8 @@ class GUIWindow():
             color = "#00AA00"
         else:
             color = "#CCCCCC"
-        location = (x,y)
-        self.colorTriangle(location, heading_deg, color,tri_size=20)
+        location = (x/SCALE,y/SCALE)
+        self.colorTriangle(location, heading_deg, color,tri_size=15)
 
 
     def _show_particles(self, particles):
@@ -94,16 +100,15 @@ class GUIWindow():
         idx = 0
         while idx < len(particles):
             p = particles[int(idx)]
-            coord = (p.x,p.y)
-            # print((p.x,p.y))
+            coord = (p.x/SCALE,p.y/SCALE)
             self.colorCircle(coord, '#FF0000', 2)
             ldx, ldy = rotate_point(line_length, 0, p.h)
             self.colorLine(coord, (coord[0]+ldx, coord[1]+ldy))
             idx += draw_skip
 
     def _show_robot(self, robot):
-        coord = (robot.x, robot.y)
-        self.colorTriangle(coord, robot.h, '#FF0000', tri_size=15)
+        coord = (robot.x/SCALE, robot.y/SCALE)
+        self.colorTriangle(coord, robot.h, '#FF0000', tri_size=20)
         # plot fov
         fov_lx, fov_ly = rotate_point(8, 0, robot.h + ROBOT_CAMERA_FOV_DEG / 2)
         fov_rx, fov_ry = rotate_point(8, 0, robot.h - ROBOT_CAMERA_FOV_DEG / 2)
@@ -208,7 +213,7 @@ class GUIWindow():
         master = Tk()
         master.wm_title("Particle Filter: Grey/Green - estimated, Red - ground truth")
 
-        self.canvas = Canvas(master, width = self.grid.width * self.grid.scale, height = self.grid.height * self.grid.scale, bd = 0, bg = '#FFFFFF')
+        self.canvas = Canvas(master, width = self.width * self.grid.scale, height = self.height * self.grid.scale, bd = 0, bg = '#FFFFFF')
         self.canvas.pack(side=LEFT)
 
         if self.show_camera:

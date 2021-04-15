@@ -4,20 +4,22 @@ import itertools
 from shapely import geometry
 from localization.utils import (
     rotate_point,
-    get_visible_markers,
     marker_distance,
     marker_heading_diff,
-    sample_particles,
 )
 
 
 MARKER_TRANS_SIGMA = 5  # translational err in inch (grid unit)
 MARKER_ROT_SIGMA = 25  # rotational err in deg
 
+ROBOT_CAMERA_FOV_DEG = 69.0
 
 class World:
-    def __init__(self, boundary_points, obstacle_points, markers):
+
+    def __init__(self, boundary_points: list, obstacle_points: list, markers: list):
+
         self.world_polygon = geometry.Polygon([[float(p[0]), float(p[1])] for p in boundary_points])
+        print(self.world_polygon)
         self.obstacles = geometry.Polygon([[float(p[0]), float(p[1])] for p in obstacle_points])
         self.markers = []
         for marker in markers:
@@ -25,7 +27,7 @@ class World:
 
 
 class Particle:
-    def __init__(self, point, num_sample=1, weight=1.0, heading=None):
+    def __init__(self, point: geometry.Point, num_sample=1, weight=1.0, heading=None):
         if heading is None:
             heading = np.random.randint(0, 360)
 
@@ -50,9 +52,9 @@ class Particle:
 class ParticleFilter:
     def __init__(
         self,
-        boundary_points,
-        obstacle_points,
-        markers,
+        boundary_points: list,
+        obstacle_points: list,
+        markers: list,
         num_particles=1000,
         sigma_rotation=1.0,
         sigma_translation=1.0,
@@ -66,6 +68,8 @@ class ParticleFilter:
         minx, miny, maxx, maxy = self.world.world_polygon.bounds
         while len(self.particles) < self.num_particles:
             point = geometry.Point(np.random.randint(minx, maxx), np.random.randint(miny, maxy))
+            if point.x > 1143  and point.x < 2210:
+                print(point)
             if self.world.world_polygon.contains(
                 point
             ) and not self.world.obstacles.contains(point):
@@ -74,7 +78,7 @@ class ParticleFilter:
         self.sigma_rotation = sigma_rotation
         self.sigma_translation = sigma_translation
 
-    def motion_update(self, odom_reading, sigma_translation=1.0, sigma_rotation=1.0):
+    def motion_update(self, odom_reading: tuple, sigma_translation=1.0, sigma_rotation=1.0):
         motion_particles = []
 
         for particle in self.particles:
@@ -93,16 +97,17 @@ class ParticleFilter:
             )
             motion_particles.append(new_particle)
 
-        self.particles = motion_particles
-        return self.particles
 
-    def measurement_update(self, measured_marker_list, grid):
+        self.particles = motion_particles
+
+
+    def measurement_update(self, measured_marker_list: list):
         if len(measured_marker_list) > 0:
             for particle in self.particles:
                 if self.world.world_polygon.contains(
                     particle.shapely_point
                 ) and not self.world.obstacles.contains(particle.shapely_point):
-                    particle_markers = get_visible_markers(particle, self.world.markers)
+                    particle_markers = self.get_visible_markers(particle, self.world.markers)
                     gt_markers = measured_marker_list
                     marker_pairs = []
 
@@ -123,7 +128,7 @@ class ParticleFilter:
                     prob = 1.0
                     for particle_marker, gt_marker in marker_pairs:
                         d_xy = marker_distance(particle_marker, gt_marker)
-                        d_h = marker_heading_diff(particle_marker, gt_marker)
+                        d_h = marker_heading_diff(particle_marker[2], gt_marker[2])
 
                         exp1 = (d_xy ** 2) / (2 * MARKER_TRANS_SIGMA ** 2)
                         exp2 = (d_h ** 2) / (2 * MARKER_ROT_SIGMA ** 2)
@@ -143,19 +148,16 @@ class ParticleFilter:
         total_weight = 0.0
         for particle in self.particles:
             total_weight += particle.weight
-
         if total_weight != 0:
             for particle in self.particles:
                 particle.weight /= total_weight
-                self.particles = sample_particles(
-                    self.world,
-                    existing_particles=self.particles,
-                    random_particles=50,
-                    num_sample=self.num_particles // 2,
-                )
+            self.particles = self.sample_particles(
+                existing_particles=self.particles,
+                random_particles=50,
+                num_sample=self.num_particles // 2,
+            )
         else:
-            self.particles = sample_particles(
-                self.world,
+            self.particles = self.sample_particles(
                 existing_particles=None,
                 random_particles=self.num_particles,
                 num_sample=self.num_particles,
@@ -163,4 +165,44 @@ class ParticleFilter:
 
         self.top_particle = max(self.particles, key=lambda p: p.weight)
         return self.particles
+
+    def sample_particles(self, existing_particles: list, random_particles: int, num_sample: int):
+        new_particles = []
+        minx, miny, maxx, maxy = self.world.world_polygon.bounds
+        while len(new_particles) < random_particles:
+            point = geometry.Point(np.random.randint(minx, maxx), np.random.randint(miny, maxy))
+            if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(point):
+                new_particles.append(Particle(point, num_sample=random_particles))
+
+        if existing_particles:
+            new_particles = existing_particles + new_particles
+            total_weight = 0.0
+            for p in new_particles:
+                total_weight += p.weight
+            for p in new_particles:
+                p.weight /= total_weight
+        probs = []
+        particles = []
+
+        for particle in new_particles:
+            probs.append(particle.weight)
+            particles.append(particle)
+        new_particles = np.random.choice(
+            new_particles, size=num_sample, replace=False, p=probs
+        )
+        return new_particles
+
+    def get_visible_markers(self, particle: Particle, markers: list):
+        # Return list of markers in the vision cone for particle
+        marker_list = []
+        x, y, h = particle.xyh
+
+        for marker in markers:
+            marker_x, marker_y, marker_heading = marker
+            # rotate marker into robot frame
+            marker_x_new, marker_y_new = rotate_point(marker_x - x, marker_y - y, -h)
+            if math.fabs(math.degrees(math.atan2(marker_y_new, marker_x_new))) < ROBOT_CAMERA_FOV_DEG / 2.0:
+                #marker_heading = marker_heading_diff(marker_heading, h)
+                marker_list.append((marker_x, marker_y, marker_heading))
+        return marker_list
 

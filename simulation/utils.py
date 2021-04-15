@@ -81,3 +81,12 @@ def add_marker_measurement_noise(marker_measured, trans_sigma, rot_sigma):
     return (add_gaussian_noise(marker_measured[0], trans_sigma), \
         add_gaussian_noise(marker_measured[1], trans_sigma), \
         add_gaussian_noise(marker_measured[2], rot_sigma))
+
+def readCoordinatesFromTxt(file: str) -> list:
+    points = []
+    point_file = open(file)
+
+    for p in point_file.readlines():
+        ordered_pair = p.split(",")
+        points.append((float(ordered_pair[0]),float(ordered_pair[1])))
+    return points

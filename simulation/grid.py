@@ -1,10 +1,13 @@
 import json
 from setting import *
+from utils import readCoordinatesFromTxt
 import random
 random.seed(RANDOM_SEED)
 import math
 
+from shapely import geometry
 
+SCALE = 50
 # grid map class
 class CozGrid:
 
@@ -13,32 +16,20 @@ class CozGrid:
         orientation = {'U': 0.0,'L':90.0,'D': 180.0, 'R': 270.0}
         with open(fname) as configfile:
             config = json.loads(configfile.read())
-            self.width = config['width']
-            self.height = config['height']
+            self.width = config['width']//SCALE
+            self.height = config['height']//SCALE
             self.scale = config['scale']
 
             self.occupied = []
             self.markers = []
 
-            # . - empty square
-            # O - occupied square
-            # U/D/L/R - marker with different orientations up/down/left/right
-            for row in range(self.height):
-                for col in range(self.width):
-                    # empty
-                    entry = config['layout'][self.height - row - 1][col]
-                    if entry == '.':
-                        pass
-                    # obstacles
-                    elif entry == 'O':
-                        self.occupied.append((col, row))
-                    # marker: U/D/L/R
-                    # orientation of markers
-                    elif entry == 'U' or entry == 'D' or entry == 'L' or entry == 'R':
-                        self.markers.append((col, row, entry))
-                    # error
-                    else:
-                        raise ValueError('Cannot parse file')
+            for entry in config["layout"]:
+                print(entry)
+                self.markers.append((entry[0],entry[1],entry[2]))
+
+            obs = readCoordinatesFromTxt('obstacle_points.txt')
+            self.obstacle = geometry.Polygon([[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs])
+            self.obstaclePoints = [[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs]
 
     def is_in(self, x, y):
         """ Determain whether the cell is in the grid map or not
@@ -46,7 +37,12 @@ class CozGrid:
             x, y - X and Y in the cell map
             Return: boolean results
         """
-        if x < 0 or y < 0 or x > self.width or y > self.height:
+        xScale = x/SCALE
+        yScale = y/SCALE
+        point = geometry.Point(xScale,yScale)
+
+        if xScale < 0 or yScale < 0 or xScale > self.width or yScale > self.height or self.obstacle.contains(point):
+
             return False
         return True
 
