@@ -23,13 +23,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/localization/particle_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/localization/particle_filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/localization/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/localization/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/boundary_points.txt" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/boundary_points.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/grid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/map_arena.json" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/map_arena.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/obstacle_points.txt" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/obstacle_points.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulation/pf_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/pf_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1618509886118</updated>
-      <workItem from="1618509887164" duration="10405000" />
+      <workItem from="1618509887164" duration="16654000" />
     </task>
     <servers />
   </component>
@@ -107,22 +101,26 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1493" height="223" key="GridCell.Tab.0.bottom" timestamp="1618521110688">
+    <state x="93" y="93" width="1350" height="678" key="DiffContextDialog" timestamp="1618526996985">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1618521110688" />
-    <state width="1493" height="223" key="GridCell.Tab.0.center" timestamp="1618521110688">
+    <state x="93" y="93" width="1350" height="678" key="DiffContextDialog/0.0.1536.864@0.0.1536.864" timestamp="1618526996985" />
+    <state width="1493" height="223" key="GridCell.Tab.0.bottom" timestamp="1618527420462">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1618521110688" />
-    <state width="1493" height="223" key="GridCell.Tab.0.left" timestamp="1618521110688">
+    <state width="1493" height="223" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1618527420462" />
+    <state width="1493" height="223" key="GridCell.Tab.0.center" timestamp="1618527420462">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1618521110688" />
-    <state width="1493" height="223" key="GridCell.Tab.0.right" timestamp="1618521110688">
+    <state width="1493" height="223" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1618527420462" />
+    <state width="1493" height="223" key="GridCell.Tab.0.left" timestamp="1618527420462">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state width="1493" height="223" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1618521110688" />
+    <state width="1493" height="223" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1618527420462" />
+    <state width="1493" height="223" key="GridCell.Tab.0.right" timestamp="1618527420462">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1493" height="223" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1618527420462" />
     <state width="1493" height="277" key="GridCell.Tab.1.bottom" timestamp="1618517960635">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
@@ -142,6 +140,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CS8803_Warehouse_Helper$simulation.coverage" NAME="simulation Coverage Results" MODIFIED="1618419762572" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils" />
-    <SUITE FILE_PATH="coverage/CS8803_Warehouse_Helper$pf_gui.coverage" NAME="pf_gui Coverage Results" MODIFIED="1618521110679" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simulation" />
+    <SUITE FILE_PATH="coverage/CS8803_Warehouse_Helper$pf_gui.coverage" NAME="pf_gui Coverage Results" MODIFIED="1618527420455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/simulation" />
   </component>
 </project>

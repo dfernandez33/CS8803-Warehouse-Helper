@@ -12,7 +12,7 @@ import sys
 from localization.particle_filter import Particle, ParticleFilter
 #from particle_filter import *
 from localization.utils import *
-
+from setting import *
 # map you want to test
 Map_filename = "map_arena.json"
 
@@ -102,7 +102,7 @@ class ParticleFilterSim:
         # ---------- Find markers in camera ----------
         # read markers
         #
-        r_marker_list_raw = self.pf.get_visible_markers(self.robbie,self.markers)
+        r_marker_list_raw = self.robbie.get_visible_markers(self.markers)
         print("r_marker_list :", r_marker_list_raw)
 
         # add noise to marker list
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     markers = [parse_marker_info(x[0],x[1],x[2]) for x in grid.markers]
     # particles = Particle.create_random(PARTICLE_COUNT, grid)
     robbie = Robot(Robot_init_pose[0], Robot_init_pose[1], Robot_init_pose[2])
-    particlefilter = ParticleFilter(boundary_points,obstacle_points,markers)
+    particlefilter = ParticleFilter(boundary_points,obstacle_points,markers, num_particles=PARTICLE_COUNT)
     particlefilter_sim = ParticleFilterSim(particlefilter,robbie,grid)
 
     if Use_GUI:

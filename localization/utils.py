@@ -23,9 +23,12 @@ def marker_distance(marker_a: tuple, marker_b: tuple):
 
 
 def marker_heading_diff(marker_a: int, marker_b: int) -> int:
-    heading_a = marker_a
-    heading_b = marker_b
+    dh = marker_a - marker_b
+    while dh > 180:
+        dh -= 360
+    while dh <= -180:
+        dh += 360
+    return dh
 
-    return (heading_a - heading_b) % 360
 
 
