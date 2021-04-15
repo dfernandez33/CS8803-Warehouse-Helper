@@ -13,6 +13,7 @@ import pyrealsense2 as rs
 import time
 import jetson.inference
 import jetson.utils
+import json
 
 COCO_INSTANCE_CATEGORY_NAMES = [
     '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
@@ -51,12 +52,13 @@ while True:
         (x, y, w, h) = barcode.rect
         # the barcode data is a bytes object so if we want to draw it on
         # our output image we need to convert it to a string first
-        barcodeData = barcode.data.decode("utf-8")
+        barcodeData = json.loads(barcode.data.decode("utf-8"))
         barcodeType = barcode.type
         # draw the barcode data and barcode type on the image
         depth = depth_frame[x:x+w, y:y+h].astype(float)
         depth = depth * cam_manager.depth_scale
         dist,_,_,_ = cv2.mean(depth[depth > 0])
+        barcodeData['distance'] = dist
         # print the barcode type and data to the terminal
         print("[INFO] Found {} barcode: {} at {} meters".format(barcodeType, barcodeData, dist))
 
