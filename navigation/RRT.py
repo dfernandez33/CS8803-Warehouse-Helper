@@ -142,9 +142,9 @@ class RRT:
         scaled_start = (start[0] * self.SCALE_FACTOR[0], start[1] * self.SCALE_FACTOR[1])
         scaled_goal = (goal[0] * self.SCALE_FACTOR[0], goal[1] * self.SCALE_FACTOR[1])
         pygame.draw.circle(self.screen, self.GREEN, [scaled_start[0], self.SCREEN_SIZE[1] - scaled_start[1]],
-                           76.2 * self.SCALE_FACTOR[0], 0)
+                           76 * self.SCALE_FACTOR[0], 0)
         pygame.draw.circle(self.screen, self.BLUE, [scaled_goal[0], self.SCREEN_SIZE[1] - scaled_goal[1]],
-                           76.2 * self.SCALE_FACTOR[0], 0)
+                           76 * self.SCALE_FACTOR[0], 0)
         for obstacle in self.obstacles:
             pygame.draw.rect(self.screen, self.BLACK, (obstacle[0] * self.SCALE_FACTOR[0],
                                                        self.SCREEN_SIZE[1] - (obstacle[1] * self.SCALE_FACTOR[1]),
