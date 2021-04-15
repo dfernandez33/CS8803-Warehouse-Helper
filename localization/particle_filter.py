@@ -17,8 +17,8 @@ MARKER_ROT_SIGMA = 25  # rotational err in deg
 
 class World:
     def __init__(self, boundary_points, obstacle_points, markers):
-        self.world_polygon = geometry.Polygon([[p.x, p.y] for p in boundary_points])
-        self.obstacles = geometry.Polygon([[p.x, p.y] for p in obstacle_points])
+        self.world_polygon = geometry.Polygon([[float(p[0]), float(p[1])] for p in boundary_points])
+        self.obstacles = geometry.Polygon([[float(p[0]), float(p[1])] for p in obstacle_points])
         self.markers = []
         for marker in markers:
             self.markers.append(marker)
@@ -27,7 +27,7 @@ class World:
 class Particle:
     def __init__(self, point, num_sample=1, weight=1.0, heading=None):
         if heading is None:
-            heading = np.randint(0, 360)
+            heading = np.random.randint(0, 360)
 
         self.shapely_point = point
         self.x = point.x
@@ -65,7 +65,7 @@ class ParticleFilter:
 
         minx, miny, maxx, maxy = self.world.world_polygon.bounds
         while len(self.particles) < self.num_particles:
-            point = geometry.Point(np.randint(minx, maxx), np.randint(miny, maxy))
+            point = geometry.Point(np.random.randint(minx, maxx), np.random.randint(miny, maxy))
             if self.world.world_polygon.contains(
                 point
             ) and not self.world.obstacles.contains(point):
@@ -94,21 +94,23 @@ class ParticleFilter:
             motion_particles.append(new_particle)
 
         self.particles = motion_particles
+        return self.particles
 
     def measurement_update(self, measured_marker_list, grid):
         if len(measured_marker_list) > 0:
             for particle in self.particles:
                 if self.world.world_polygon.contains(
                     particle.shapely_point
-                ) and not self.world.obstacles(particle.shapely_point):
+                ) and not self.world.obstacles.contains(particle.shapely_point):
                     particle_markers = get_visible_markers(particle, self.world.markers)
                     gt_markers = measured_marker_list
                     marker_pairs = []
 
                     while len(particle_markers) > 0 and len(gt_markers) > 0:
                         pairs = itertools.product(particle_markers, gt_markers)
+
                         particle_marker, gt_marker = min(
-                            pairs,
+                            list(pairs),
                             key=lambda marker_pair: marker_distance(
                                 marker_pair[0], marker_pair[1]
                             ),
@@ -160,3 +162,5 @@ class ParticleFilter:
             )
 
         self.top_particle = max(self.particles, key=lambda p: p.weight)
+        return self.particles
+

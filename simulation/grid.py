@@ -9,6 +9,8 @@ import math
 class CozGrid:
 
     def __init__(self, fname):
+
+        orientation = {'U': 0.0,'L':90.0,'D': 180.0, 'R': 270.0}
         with open(fname) as configfile:
             config = json.loads(configfile.read())
             self.width = config['width']

@@ -1,8 +1,12 @@
 import math
 import numpy as np
 from shapely import geometry
-from localization.particle_filter import Particle
+import sys
 
+
+from localization.particle_filter import *
+
+ROBOT_CAMERA_FOV_DEG = 69.0
 
 def rotate_point(x, y, heading_deg):
     c = math.cos(math.radians(heading_deg))
@@ -16,25 +20,27 @@ def get_visible_markers(particle, markers):
     # Return list of markers in the vision cone for particle
     marker_list = []
     x, y, h = particle.xyh
+
     for marker in markers:
         marker_x, marker_y, marker_heading = marker
         # rotate marker into robot frame
         marker_x, marker_y = rotate_point(marker_x - x, marker_y - y, -h)
-        if math.fabs(math.degrees(math.atan2(marker_y, marker_x))) < 62 / 2.0:
+        if math.fabs(math.degrees(math.atan2(marker_y, marker_x))) < ROBOT_CAMERA_FOV_DEG / 2.0:
             marker_heading = marker_heading_diff(marker_heading, h)
             marker_list.append((marker_x, marker_y, marker_heading))
     return marker_list
 
 
 def marker_distance(marker_a, marker_b):
+
     coord_a = marker_a[0]
     coord_b = marker_b[0]
     return coord_a.distance(coord_b)
 
 
 def marker_heading_diff(marker_a, marker_b):
-    heading_a = marker_a[1]
-    heading_b = marker_b[1]
+    heading_a = marker_a
+    heading_b = marker_b
     return (heading_a - heading_b) % 360
 
 
