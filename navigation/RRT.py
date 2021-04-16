@@ -5,7 +5,6 @@ import random
 import networkx
 import heapq
 import pygame
-import sys
 
 
 class RRT:
@@ -40,7 +39,6 @@ class RRT:
         waypoints are in the global coordinate frame.
         :param start: tuple with x,y coordinates of starting location (in mm).
         :param goal: tuple with x,y coordinate of goal location (in mm).
-        :param display: whether to display the resulting tree or not
         :param distance_tolerance: how close to the goal the path should be to.
         :return: List of waypoints representing the path.
         """
