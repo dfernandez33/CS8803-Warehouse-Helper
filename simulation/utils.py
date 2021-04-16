@@ -6,6 +6,7 @@ import math
 """ Some math utilies, feel free to use any of these!!!
 """
 
+
 # euclian distance in grid world
 def grid_distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
@@ -23,18 +24,18 @@ def rotate_point(x, y, heading_deg):
 # heading angle difference = heading1 - heading2
 # return value always in range (-180, 180] in deg
 def diff_heading_deg(heading1, heading2):
-	dh = heading1 - heading2
-	while dh > 180:
-		dh -= 360
-	while dh <= -180:
-		dh += 360
-	return dh
+    dh = heading1 - heading2
+    while dh > 180:
+        dh -= 360
+    while dh <= -180:
+        dh += 360
+    return dh
 
 
 def compute_mean_pose(particles, confident_dist=1):
     """ Compute the mean pose for all particles
-    	This is not part of the particle filter algorithm but rather an
-    	addition to show the "best belief" for current pose
+        This is not part of the particle filter algorithm but rather an
+        addition to show the "best belief" for current pose
     """
     m_x, m_y, m_count = 0, 0, 0
     # for rotation average
@@ -55,7 +56,7 @@ def compute_mean_pose(particles, confident_dist=1):
     # average rotation
     m_hx /= m_count
     m_hy /= m_count
-    m_h = math.degrees(math.atan2(m_hx, m_hy));
+    m_h = math.degrees(math.atan2(m_hx, m_hy))
 
     # Now compute how good that mean is -- check how many particles
     # actually are in the immediate vicinity
@@ -72,15 +73,16 @@ def compute_mean_pose(particles, confident_dist=1):
 def add_gaussian_noise(data, sigma):
     return data + random.gauss(0.0, sigma)
 
+
 def add_odometry_noise(odom_act, heading_sigma, trans_sigma):
-    return (add_gaussian_noise(odom_act[0], trans_sigma), \
-        add_gaussian_noise(odom_act[1], trans_sigma), \
-        add_gaussian_noise(odom_act[2], heading_sigma))
+    return (add_gaussian_noise(odom_act[0], trans_sigma), add_gaussian_noise(odom_act[1], trans_sigma),
+            add_gaussian_noise(odom_act[2], heading_sigma))
+
 
 def add_marker_measurement_noise(marker_measured, trans_sigma, rot_sigma):
-    return (add_gaussian_noise(marker_measured[0], trans_sigma), \
-        add_gaussian_noise(marker_measured[1], trans_sigma), \
-        add_gaussian_noise(marker_measured[2], rot_sigma))
+    return (add_gaussian_noise(marker_measured[0], trans_sigma), add_gaussian_noise(marker_measured[1], trans_sigma),
+            add_gaussian_noise(marker_measured[2], rot_sigma))
+
 
 def readCoordinatesFromTxt(file: str) -> list:
     points = []
@@ -88,5 +90,5 @@ def readCoordinatesFromTxt(file: str) -> list:
 
     for p in point_file.readlines():
         ordered_pair = p.split(",")
-        points.append((float(ordered_pair[0]),float(ordered_pair[1])))
+        points.append((float(ordered_pair[0]), float(ordered_pair[1])))
     return points

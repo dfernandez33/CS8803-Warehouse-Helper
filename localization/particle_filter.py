@@ -14,6 +14,7 @@ MARKER_ROT_SIGMA = 25  # rotational err in deg
 PARTICLE_COUNT = 5000
 ROBOT_CAMERA_FOV_DEG = 69.0
 
+
 class World:
 
     def __init__(self, boundary_points: list, obstacle_points: list, markers: list):
@@ -112,7 +113,6 @@ class ParticleFilter:
 
         self.particles = motion_particles
 
-
     def measurement_update(self, measured_marker_list: list):
         if measured_marker_list:
             for particle in self.particles:
@@ -147,7 +147,6 @@ class ParticleFilter:
                         likelihood = math.exp(-(exp1 + exp2))
                         prob *= likelihood
 
-
                     particle.weight = prob
 
                 else:
@@ -156,18 +155,13 @@ class ParticleFilter:
             for p in self.particles:
                 if p.get_visible_markers(self.world.markers):
                     p.weight = 0.0
-        # else:
-        #     for particle in self.particles:
-        #         particle.weight = 1.0 / len(self.particles)
 
         total_weight = 0.0
         for particle in self.particles:
             total_weight += particle.weight
 
-
         if total_weight != 0:
-            # for particle in self.particles:
-            #     particle.weight /= total_weight
+
             self.particles = self.sample_particles(
                 existing_particles=self.particles,
                 random_particles=PARTICLE_COUNT//20,
@@ -200,7 +194,6 @@ class ParticleFilter:
         for p in new_particles:
             p.weight /= total_weight
 
-
         probs = []
         particles = []
 
@@ -208,10 +201,7 @@ class ParticleFilter:
             probs.append(particle.weight)
             particles.append(particle)
         zipped = zip(probs,particles)
-        sortedPart = sorted(zipped,key = lambda k: k[0], reverse = True)
-        print("highest likely particles: ",[(x[0],x[1].x, x[1].y, x[1].h) for x in sortedPart[0:10]])
+        sortedPart = sorted(zipped, key=lambda k: k[0], reverse=True)
+        print("highest likely particles: ", [(x[0], x[1].x, x[1].y, x[1].h) for x in sortedPart[0:10]])
         new_particles = np.random.choice(new_particles, size=PARTICLE_COUNT, replace=True, p=probs)
         return new_particles
-
-
-

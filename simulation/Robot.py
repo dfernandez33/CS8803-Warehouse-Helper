@@ -1,31 +1,29 @@
 from localization.particle_filter import Particle
-from shapely import geometry
 from setting import *
 import random
 random.seed(RANDOM_SEED)
-import math
-
 from utils import *
 from grid import *
+
 
 """ Robot class
     A class for robot, contains same x, y, and heading information as particles
     but with some more utitilies for robot motion / collision checking
 """
+
+
 class Robot(Particle):
 
     def __init__(self, x, y, h):
-        point = geometry.Point(x,y)
+        point = geometry.Point(x, y)
         super(Robot, self).__init__(point, heading=h)
-
-    #def __init__(self, grid):
-    #    super(Robot, self).__init__(*grid.random_free_place())
 
     def __repr__(self):
         return "(x = %f, y = %f, heading = %f deg)" % (self.x, self.y, self.h)
 
     # return a random robot heading angle
-    def chose_random_heading(self):
+    @staticmethod
+    def chose_random_heading():
         return random.uniform(0, 360)
 
     def read_markers(self, grid):
@@ -67,7 +65,6 @@ class Robot(Particle):
         self.y += dy
         self.h = self.h + odom[2]
 
-
     def check_collsion(self, odom, grid):
         """ Check whether moving the robot will cause collision.
             Note this function will *not* move the robot
@@ -76,6 +73,6 @@ class Robot(Particle):
             Return: True if will cause collision, False if will not be a collision
         """
         dx, dy = rotate_point(odom[0], odom[1], self.h)
-        if grid.is_free(self.x+dx, self.y+dy):
+        if grid.is_free(self.x + dx, self.y + dy):
             return False
         return True

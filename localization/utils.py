@@ -1,10 +1,8 @@
 import math
 import numpy as np
-from shapely import geometry
-import sys
+
 
 def rotate_point(x, y, heading_deg):
-
     c = math.cos(math.radians(heading_deg))
     s = math.sin(math.radians(heading_deg))
     xr = x * c + y * -s

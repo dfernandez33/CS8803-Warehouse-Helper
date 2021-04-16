@@ -1,4 +1,4 @@
-# Set randome seed to None for random testing, to 0 for deterministic testing
+# Set random seed to None for random testing, to 0 for deterministic testing
 RANDOM_SEED = None
 # RANDOM_SEED = 0
 
@@ -19,9 +19,9 @@ PARTICLE_MAX_SHOW = 500     # Max number of particles to be shown in GUI (for sp
 ROBOT_CAMERA_FOV_DEG = 40  # Robot camera FOV in degree
 
 ###################################
-## Non ideal robot detection model
+# Non ideal robot detection model
 ###################################
-## Feel free to modify the values for debugging
+# Feel free to modify the values for debugging
 
 # Clean detection
 DETECTION_FAILURE_RATE = 0.2

@@ -3,17 +3,16 @@ from setting import *
 from utils import readCoordinatesFromTxt
 import random
 random.seed(RANDOM_SEED)
-import math
-
 from shapely import geometry
 
 SCALE = 50
 # grid map class
+
+
 class CozGrid:
 
     def __init__(self, fname):
-
-        orientation = {'U': 0.0,'L':90.0,'D': 180.0, 'R': 270.0}
+        orientation = {'U': 0.0, 'L': 90.0, 'D': 180.0, 'R': 270.0}
         with open(fname) as configfile:
             config = json.loads(configfile.read())
             self.width = config['width']//SCALE
@@ -25,14 +24,14 @@ class CozGrid:
 
             for entry in config["layout"]:
                 print(entry)
-                self.markers.append((entry[0],entry[1],entry[2]))
+                self.markers.append((entry[0], entry[1], entry[2]))
 
             obs = readCoordinatesFromTxt('obstacle_points.txt')
             self.obstacle = geometry.Polygon([[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs])
             self.obstaclePoints = [[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs]
 
     def is_in(self, x, y):
-        """ Determain whether the cell is in the grid map or not
+        """ Determine whether the cell is in the grid map or not
             Argument:
             x, y - X and Y in the cell map
             Return: boolean results
@@ -47,14 +46,14 @@ class CozGrid:
         return True
 
     def is_free(self, x, y):
-        """ Determain whether the cell is in the *free part* of grid map or not
+        """ Determine whether the cell is in the *free part* of grid map or not
             Argument:
             x, y - X and Y in the cell map
             Return: boolean results
         """
         if not self.is_in(x, y):
             return False
-        yy = int(y) # self.height - int(y) - 1
+        yy = int(y)  # self.height - int(y) - 1
         xx = int(x)
         return (xx, yy) not in self.occupied
 
