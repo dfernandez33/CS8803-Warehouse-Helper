@@ -11,7 +11,7 @@ from localization.utils import (
 
 MARKER_TRANS_SIGMA = 5  # translational err in inch (grid unit)
 MARKER_ROT_SIGMA = 25  # rotational err in deg
-
+PARTICLE_COUNT = 5000
 ROBOT_CAMERA_FOV_DEG = 69.0
 
 class World:
@@ -127,9 +127,9 @@ class ParticleFilter:
 
                         particle_marker, gt_marker = min(
                             list(pairs),
-                            key=lambda marker_pair: marker_distance(
+                            key=lambda marker_pair: (marker_distance(
                                 marker_pair[0], marker_pair[1]
-                            ),
+                            )/10)**2 + marker_heading_diff(marker_pair[0][2],marker_pair[1][2])**2,
                         )
                         marker_pairs.append((particle_marker, gt_marker))
 
@@ -138,7 +138,7 @@ class ParticleFilter:
 
                     prob = 1.0
                     for particle_marker, gt_marker in marker_pairs:
-                        d_xy = marker_distance(particle_marker, gt_marker)
+                        d_xy = marker_distance(particle_marker, gt_marker)/10
                         d_h = marker_heading_diff(particle_marker[2], gt_marker[2])
 
                         exp1 = (d_xy ** 2) / (2 * MARKER_TRANS_SIGMA ** 2)
@@ -189,7 +189,7 @@ class ParticleFilter:
         while len(new_particles) < random_particles:
             point = geometry.Point(np.random.randint(minx, maxx), np.random.randint(miny, maxy))
             if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(point):
-                new_particles.append(Particle(point, num_sample=random_particles))
+                new_particles.append(Particle(point, num_sample=PARTICLE_COUNT))
 
         if existing_particles:
             new_particles = existing_particles + new_particles
