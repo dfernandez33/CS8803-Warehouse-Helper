@@ -27,14 +27,14 @@ Use_GUI = True
 # 1. Robot move forward, if hit an obstacle, robot bounces to a random direction
 # 2. Robot move as a circle (This is the motion autograder uses)
 # This is the flag to enable circle motion or not
-Move_circular = False
+Move_circular = True
 
 # robot moving speed (grid per move)
-Robot_speed = 25
+Robot_speed = 50
 # initial robot transformation (X, Y, yaw in deg)
 Robot_init_pose = (500, 300, 0)
 # Angle (in degree) to turn per run in circle motion mode
-Dh_circular = 10
+Dh_circular = 20
 
 
 
@@ -58,10 +58,10 @@ def move_robot_forward(robot, speed, grid):
 # Circular motion mode:
 # if in collsion throw error
 # This is the motion mode autograder will use
-def move_robot_circular(robot, dh, speed, grid):
+def move_robot_circular(robot, dh, speed, grid, t):
     old_x, old_y = robot.x, robot.y
     old_heading = robot.h
-    if robot.check_collsion((speed, 0, dh), grid):
+    if robot.check_collsion((speed, 0,  + 10*math.cos(t*.1)), grid):
         raise ValueError('Robot in collision')
     else:
         robot.move((speed, 0, dh))
@@ -79,13 +79,13 @@ class ParticleFilterSim:
         self.robbie = robbie
         self.grid = grid
         self.markers = [parse_marker_info(x[0],x[1],x[2]) for x in self.grid.markers]
-
+        self.time_step = 0
 
     def update(self):
 
         # ---------- Move Robot and get odometry ----------
         if Move_circular:
-            odom = add_odometry_noise(move_robot_circular(self.robbie, Dh_circular, Robot_speed, self.grid), \
+            odom = add_odometry_noise(move_robot_circular(self.robbie, Dh_circular, Robot_speed, self.grid, self.time_step), \
                 heading_sigma=ODOM_HEAD_SIGMA, trans_sigma=ODOM_TRANS_SIGMA)
         else:
             odom = add_odometry_noise(move_robot_forward(self.robbie, Robot_speed, self.grid), \
@@ -162,4 +162,5 @@ if __name__ == "__main__":
         gui.start()
     else:
         while True:
+            particlefilter_sim.time_step += 1
             particlefilter_sim.update()
