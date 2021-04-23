@@ -129,7 +129,9 @@ class ParticleFilter:
                             list(pairs),
                             key=lambda marker_pair: (marker_distance(
                                 marker_pair[0], marker_pair[1]
-                            )/50)**2 + marker_heading_diff(marker_pair[0][2],marker_pair[1][2])**2,
+                            )/100)**2 / (2 * MARKER_TRANS_SIGMA ** 2)
+                            + marker_heading_diff(marker_pair[0][2],marker_pair[1][2])**2
+                                                    / (2 * MARKER_ROT_SIGMA ** 2),
                         )
                         marker_pairs.append((particle_marker, gt_marker))
 
@@ -138,7 +140,7 @@ class ParticleFilter:
 
                     prob = 1.0
                     for particle_marker, gt_marker in marker_pairs:
-                        d_xy = marker_distance(particle_marker, gt_marker)/50
+                        d_xy = marker_distance(particle_marker, gt_marker)/100
                         d_h = marker_heading_diff(particle_marker[2], gt_marker[2])
 
                         exp1 = (d_xy ** 2) / (2 * MARKER_TRANS_SIGMA ** 2)
@@ -164,7 +166,7 @@ class ParticleFilter:
 
             self.particles = self.sample_particles(
                 existing_particles=self.particles,
-                random_particles=PARTICLE_COUNT//20,
+                random_particles=PARTICLE_COUNT*.05,
                 num_sample=self.num_particles // 2,
             )
         else:
@@ -183,7 +185,7 @@ class ParticleFilter:
         while len(new_particles) < random_particles:
             point = geometry.Point(np.random.randint(minx, maxx), np.random.randint(miny, maxy))
             if self.world.world_polygon.contains(point) and not self.world.obstacles.contains(point):
-                new_particles.append(Particle(point, num_sample=PARTICLE_COUNT*20))
+                new_particles.append(Particle(point, num_sample=PARTICLE_COUNT*10))
 
         if existing_particles:
             new_particles = existing_particles + new_particles
@@ -200,8 +202,6 @@ class ParticleFilter:
         for particle in new_particles:
             probs.append(particle.weight)
             particles.append(particle)
-        zipped = zip(probs,particles)
-        sortedPart = sorted(zipped, key=lambda k: k[0], reverse=True)
-        print("highest likely particles: ", [(x[0], x[1].x, x[1].y, x[1].h) for x in sortedPart[0:10]])
+
         new_particles = np.random.choice(new_particles, size=PARTICLE_COUNT, replace=True, p=probs)
         return new_particles
