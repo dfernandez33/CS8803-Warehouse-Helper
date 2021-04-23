@@ -95,18 +95,11 @@ class ParticleFilterSim:
         # ---------- Find markers in camera ----------
         # read markers
         #
-        r_marker_list_raw = self.robbie.get_visible_markers(self.markers)
+        r_marker_list_raw = self.robbie.get_scan(grid.world_polygon)
         print("r_marker_list :", r_marker_list_raw)
 
-        # add noise to marker list
-        r_marker_list = []
-        for m in r_marker_list_raw:
-            r_marker_list.append(add_marker_measurement_noise(m,
-                                                              trans_sigma=MARKER_TRANS_SIGMA,
-                                                              rot_sigma=MARKER_ROT_SIGMA))
-
         # ---------- PF: Sensor (markers) model update ----------
-        self.pf.measurement_update(r_marker_list)
+        self.pf.measurement_update(r_marker_list_raw)
 
         # ---------- Display current state in GUI ----------
         # Try to find current best estimate for display
@@ -141,7 +134,7 @@ if __name__ == "__main__":
     markers = [parse_marker_info(x[0], x[1], x[2]) for x in grid.markers]
     # particles = Particle.create_random(PARTICLE_COUNT, grid)
     robbie = Robot(Robot_init_pose[0], Robot_init_pose[1], Robot_init_pose[2])
-    particlefilter = ParticleFilter(boundary_points, obstacle_points, markers, num_particles=PARTICLE_COUNT)
+    particlefilter = ParticleFilter(boundary_points, obstacle_points, num_particles=1000)
     particlefilter_sim = ParticleFilterSim(particlefilter, robbie, grid)
 
     if Use_GUI:

@@ -1,6 +1,6 @@
 certifi==2020.12.5
 chardet==4.0.0
-dataclasses==0.8
+dataclasses>=0.6
 decorator==4.4.2
 gtsam==4.1.0
 idna==2.10

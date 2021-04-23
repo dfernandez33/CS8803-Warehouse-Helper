@@ -28,6 +28,12 @@ class CozGrid:
 
             obs = readCoordinatesFromTxt('obstacle_points.txt')
             self.obstacle = geometry.Polygon([[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs])
+
+            boundary_points = readCoordinatesFromTxt('boundary_points.txt')
+            self.world_polygon = geometry.Polygon(
+                [[float(p[0]), float(p[1])] for p in boundary_points]
+            )
+
             self.obstaclePoints = [[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs]
 
     def is_in(self, x, y):
