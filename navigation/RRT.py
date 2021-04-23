@@ -11,7 +11,7 @@ class RRT:
 
     # These class variables are used for drawing in pygame
     SCREEN_SIZE = (1164, 800)
-    SCALE_FACTOR = (1164 / 2921, 800 / 2057.4)  # since window is size 800, 800 and the environment is 2921mm x2.0066mm
+    SCALE_FACTOR = (1164 / 2.921, 800 / 2.0574)  # since window is size 800, 800 and the environment is 2921mm x2.0066mm
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GREEN = (0, 255, 0)
@@ -33,7 +33,7 @@ class RRT:
         if display:
             self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
 
-    def get_optimal_path(self, start: Tuple, goal: Tuple, distance_tolerance=50) -> List[Tuple]:
+    def get_optimal_path(self, start: Tuple, goal: Tuple, distance_tolerance=.05) -> List[Tuple]:
         """
         Provides the optimal path from start to goal. All inputs should be in the global coordinate frame. Output
         waypoints are in the global coordinate frame.
@@ -62,6 +62,7 @@ class RRT:
             return []
 
         best_path = heapq.heappop(path_queue)[1]
+        best_path = self.__add_heading_to_waypoints(best_path, start[2], goal[2])
         if self.display:
             self.__draw_optimal_path(best_path)
         return best_path
@@ -72,7 +73,6 @@ class RRT:
         """
         self.vertices.add(start_position)
         for i in range(self.num_iterations):
-            print('Running iteration {}'.format(i))
             x_rand = (random.uniform(self.robot_radius, self.arena_width - self.robot_radius),
                       random.uniform(self.robot_radius, self.arena_height - self.robot_radius))
             x_nearest, distance = self.__get_nearest_vertex(x_rand)
@@ -121,6 +121,19 @@ class RRT:
         return obstacles
 
     @staticmethod
+    def __add_heading_to_waypoints(path, start_heading: float, goal_heading: float):
+        updated_path = []
+        for waypoint, i in zip(path, range(len(path))):
+            if i == 0:
+                updated_path.append((waypoint[0], waypoint[1], start_heading))
+            elif i == len(path) - 1:
+                updated_path.append((waypoint[0], waypoint[1], goal_heading))
+            else:
+                updated_path.append((waypoint[0], waypoint[1], 0))
+
+        return updated_path
+
+    @staticmethod
     def __build_graph(vertices: Set, edges: Set) -> networkx.Graph:
         graph = networkx.Graph()
         graph.add_nodes_from(vertices)
@@ -141,10 +154,10 @@ class RRT:
         self.screen.fill(self.WHITE)
         scaled_start = (start[0] * self.SCALE_FACTOR[0], start[1] * self.SCALE_FACTOR[1])
         scaled_goal = (goal[0] * self.SCALE_FACTOR[0], goal[1] * self.SCALE_FACTOR[1])
-        pygame.draw.circle(self.screen, self.GREEN, [int(scaled_start[0]),int(self.SCREEN_SIZE[1] - scaled_start[1])],
-                           int(76 * self.SCALE_FACTOR[0]), 0)
+        pygame.draw.circle(self.screen, self.GREEN, [int(scaled_start[0]), int(self.SCREEN_SIZE[1] - scaled_start[1])],
+                           int(.05 * self.SCALE_FACTOR[0]), 0)
         pygame.draw.circle(self.screen, self.BLUE, [int(scaled_goal[0]), int(self.SCREEN_SIZE[1] - scaled_goal[1])],
-                           int(76 * self.SCALE_FACTOR[0]), 0)
+                           int(.05 * self.SCALE_FACTOR[0]), 0)
         for obstacle in self.obstacles:
             pygame.draw.rect(self.screen, self.BLACK, (obstacle[0] * self.SCALE_FACTOR[0],
                                                        self.SCREEN_SIZE[1] - (obstacle[1] * self.SCALE_FACTOR[1]),
@@ -166,6 +179,23 @@ class RRT:
 
 
 if __name__ == '__main__':
-    rrt = RRT('obstacles.txt', 165.1, 2921, 2057.4, num_iteration=3000, display=False)
-    optimal_path = rrt.get_optimal_path((500, 500), (2500, 1600))
+    rrt = RRT('obstacles.txt', 165.1, 2921, 2057.4, num_iteration=3000, display=True)
+    optimal_path = rrt.get_optimal_path((500, 500, 0), (2500, 1600, 90))
+    # Variable to keep the main loop running
+
+    running = True
+
+    # Main loop
+    while running:
+        # Look at every event in the queue
+        for event in pygame.event.get():
+            # Did the user hit a key?
+            if event.type == pygame.KEYDOWN:
+                # Was it the Escape key? If so, stop the loop.
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+            # Did the user click the window close button? If so, stop the loop.
+            elif event.type == pygame.QUIT:
+                running = False
+
     print(optimal_path)
