@@ -34,6 +34,8 @@ class CozGrid:
                 [[float(p[0]), float(p[1])] for p in boundary_points]
             )
 
+            self.obstacle_polygon = geometry.Polygon([[float(p[0]), float(p[1])] for p in obs])
+
             self.obstaclePoints = [[float(p[0])/SCALE, float(p[1])/SCALE] for p in obs]
 
     def is_in(self, x, y):

@@ -41,7 +41,7 @@ class Particle:
     def xyh(self):
         return self.x, self.y, self.h
 
-    def get_scan(self, world: geometry.Polygon) -> list:
+    def get_scan(self, world: geometry.Polygon, obstacle: geometry.Polygon) -> list:
         curr_h = self.h - ROBOT_CAMERA_FOV_DEG / 2
         delta_h = 10.0
         laser_scan = []
@@ -53,9 +53,25 @@ class Particle:
             )
 
             laser = geometry.LineString([self.shapely_point, infinity_point])
-            intersection = laser.intersection(world).bounds
-            intersection_point = geometry.Point(intersection[2], intersection[3])
-            laser_scan.append(self.shapely_point.distance(intersection_point))
+            intersection_world = laser.intersection(world).bounds
+            intersection_world_point = geometry.Point(
+                intersection_world[2], intersection_world[3]
+            )
+            intersection_obs = laser.intersection(obstacle).bounds
+
+            if intersection_obs:
+                intersection_obs_point = geometry.Point(
+                    intersection_obs[2], intersection_obs[3]
+                )
+                laser_scan.append(
+                    min(
+                        self.shapely_point.distance(intersection_world_point),
+                        self.shapely_point.distance(intersection_obs_point),
+                    )
+                )
+            else:
+                laser_scan.append(self.shapely_point.distance(intersection_world_point))
+
             curr_h += delta_h
 
         return laser_scan
@@ -116,7 +132,9 @@ class ParticleFilter:
             if self.world.world_polygon.contains(
                 particle.shapely_point
             ) and not self.world.obstacles.contains(particle.shapely_point):
-                particle_scan = particle.get_scan(self.world.world_polygon)
+                particle_scan = particle.get_scan(
+                    self.world.world_polygon, self.world.obstacles
+                )
                 norm = np.linalg.norm(
                     np.array(particle_scan) / 1000 - np.array(robot_scan) / 1000, ord=1
                 ) / len(particle_scan)

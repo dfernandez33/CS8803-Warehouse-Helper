@@ -95,7 +95,7 @@ class ParticleFilterSim:
         # ---------- Find markers in camera ----------
         # read markers
         #
-        r_marker_list_raw = self.robbie.get_scan(grid.world_polygon)
+        r_marker_list_raw = self.robbie.get_scan(grid.world_polygon, grid.obstacle_polygon)
         print("r_marker_list :", r_marker_list_raw)
 
         # ---------- PF: Sensor (markers) model update ----------
